@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMON AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#0f172a;color:#fff}
+.container{max-width:700px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+#auth-form{display:flex;flex-direction:column;gap:8px;width:300px}
+#dashboard{background:#1e293b;padding:14px;border-radius:12px;margin:14px 0}
+#chat-box{background:#1e293b;min-height:250px;border-radius:12px;padding:12px;margin-bottom:10px;overflow:auto}
+.input-row{display:flex;gap:8px}
+input{padding:12px;border-radius:10px;border:none;width:100%}
+button{padding:12px 16px;border:none;border-radius:10px;background:#22c55e;font-weight:bold;cursor:pointer}
+.msg{margin:8px 0;padding:10px;background:#334155;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>SIMON AI</h1>
+    <div id="user-area">
+      <div id="auth-form">
+        <input id="auth-name" placeholder="Your Name">
+        <input id="auth-email" placeholder="Email - any email">
+        <input id="auth-pass" type="password" placeholder="Password">
+        <button onclick="sendCode()">Send Verification Code</button>
+        <input id="auth-code" placeholder="Enter 6-digit code from email">
+        <button onclick="doVerify()">Verify & Sign Up</button>
+        <hr><p>Already have account?</p>
+        <button onclick="doLogin()">Login</button>
+      </div>
+      <div id="user-info" style="display:none">
+        <b id="user-name"></b><span id="user-email"></span>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="dashboard">
+    <h3>Dashboard</h3>
+    <p id="dash-status">Sign up with email verification to see dashboard.</p>
+    <div id="dash-content" style="display:none">
+      <p>Welcome, <b id="dash-name"></b></p>
+      <p>Chats: <span id="dash-chats">0</span></p>
+    </div>
+  </div>
+
+  <div id="chat-box"></div>
+  <div class="input-row">
+    <input id="msg" placeholder="Ask Simon AI...">
+    <button onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+async function init(){
+  const me = await fetch("/api/account/me").then(r=>r.json());
+  if(me.user){ showUser(me.user); loadDashboard(); }
+}
+async function sendCode(){
+  const email = document.getElementById("auth-email").value.trim();
+  if(!email || !email.includes("@")) return alert("Enter valid email first");
+  const res = await fetch("/api/auth/send-code",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+  const data = await res.json();
+  alert(data.success ? "Code sent! Check email + Spam" : data.error);
+}
+async function doVerify(){
+  const name = document.getElementById("auth-name").value.trim();
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-pass").value;
+  const code = document.getElementById("auth-code").value.trim();
+  if(!name || !email || !password || !code) return alert("Fill name, email, password + code");
+  const res = await fetch("/api/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,password,code})});
+  const data = await res.json();
+  if(data.success){ showUser(data.user); loadDashboard(); }
+  else alert(data.error);
+}
+async function doLogin(){
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-pass").value;
+  const res = await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+  const data = await res.json();
+  if(data.success){ showUser(data.user); loadDashboard(); }
+  else alert(data.error);
+}
+function showUser(user){
+  document.getElementById("auth-form").style.display="none";
+  document.getElementById("user-info").style.display="flex";
+  document.getElementById("user-info").style.gap="8px";
+  document.getElementById("user-name").textContent = user.name;
+  document.getElementById("user-email").textContent = user.email;
+  document.getElementById("dash-name").textContent = user.name;
+  document.getElementById("dash-status").textContent = "Logged in as "+user.email;
+  document.getElementById("dash-content").style.display="block";
+}
+async function loadDashboard(){
+  const chats = await fetch("/api/chats").then(r=>r.json()).catch(()=>({chats:[]}));
+  document.getElementById("dash-chats").textContent = (chats.chats||[]).length;
+}
+async function sendChat(){
+  const input = document.getElementById("msg");
+  const text = input.value.trim();
+  if(!text) return;
+  const box = document.getElementById("chat-box");
+  box.innerHTML += `<div class="msg"><b>You:</b> ${text}</div>`;
+  input.value = "";
+  const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text})});
+  const data = await res.json();
+  box.innerHTML += `<div class="msg"><b>Simon:</b> ${data.reply||data.error}</div>`;
+  box.scrollTop = box.scrollHeight;
+  loadDashboard();
+}
+async function logout(){
+  await fetch("/api/auth/logout",{method:"POST"});
+  location.reload();
+}
+document.getElementById("msg").addEventListener("keydown",e=>{if(e.key==="Enter") sendChat()});
+window.addEventListener("load", init);
+</script>
+</body>
+  </html>
