@@ -3,79 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIMON AI</title>
+<title>Simon AI</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#0f172a;color:#fff}
-.container{max-width:700px;margin:0 auto;padding:16px}
-header{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-#auth-form{display:flex;flex-direction:column;gap:8px;width:300px}
-#dashboard{background:#1e293b;padding:14px;border-radius:12px;margin:14px 0}
-#chat-box{background:#1e293b;min-height:250px;border-radius:12px;padding:12px;margin-bottom:10px;overflow:auto}
-.input-row{display:flex;gap:8px}
-input{padding:12px;border-radius:10px;border:none;width:100%}
-button{padding:12px 16px;border:none;border-radius:10px;background:#22c55e;font-weight:bold;cursor:pointer}
-.msg{margin:8px 0;padding:10px;background:#334155;border-radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;background:#f0f2f5;color:#1c1e21;height:100vh;display:flex;overflow:hidden}
+.sidebar{width:260px;background:#fff;border-right:1px solid #e4e6eb;display:flex;flex-direction:column;padding:18px}
+.logo{font-size:22px;font-weight:800;background:linear-gradient(90deg,#0082ff,#a033ff,#ff5280,#ff8a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo small{display:block;font-size:11px;color:#65676b;-webkit-text-fill-color:#65676b;letter-spacing:1px}
+.side-btn{margin-top:18px;padding:12px;border:none;border-radius:999px;background:#0082ff;color:#fff;font-weight:700;cursor:pointer}
+.side-item{margin-top:10px;padding:12px;border-radius:10px;cursor:pointer;color:#050505}
+.side-item:hover{background:#f0f2f5}
+.side-item.active{background:#e7f3ff;color:#0082ff}
+.user-card{margin-top:auto;display:flex;gap:10px;align-items:center;background:#f0f2f5;padding:10px;border-radius:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0082ff,#a033ff,#ff5280);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
+.main{flex:1;display:flex;flex-direction:column;background:#fff}
+.topbar{padding:14px 20px;border-bottom:1px solid #e4e6eb;display:flex;justify-content:space-between;align-items:center}
+.topbar b{font-size:18px}
+.pill{padding:8px 14px;border-radius:999px;border:1px solid #e4e6eb;background:#fff;cursor:pointer}
+.center{flex:1;overflow:auto;padding:30px 20px;display:flex;flex-direction:column;align-items:center}
+.hero{text-align:center;margin-top:20px}
+.hero-avatar{width:72px;height:72px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#0082ff,#a033ff,#ff5280,#ff8a00);display:flex;align-items:center;justify-content:center;font-size:34px}
+.hero h1{font-size:32px;line-height:1.1}
+.hero h1 span{background:linear-gradient(90deg,#0082ff,#a033ff,#ff5280);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#65676b;margin-top:8px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px;width:100%;margin-top:26px}
+.card{background:#f0f2f5;border-radius:16px;padding:16px;cursor:pointer;text-align:left}
+.card:hover{background:#e4e6eb}
+.card b{display:block;margin-bottom:4px}
+.card span{color:#65676b;font-size:13px}
+#chat-box{width:100%;max-width:720px;display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.msg{padding:12px 16px;border-radius:18px;max-width:85%;line-height:1.5}
+.msg.me{align-self:flex-end;background:#0082ff;color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:#f0f2f5;border-bottom-left-radius:4px}
+.input-area{padding:16px;border-top:1px solid #e4e6eb;background:#fff}
+.input-wrap{max-width:720px;margin:0 auto;display:flex;gap:10px;background:#f0f2f5;padding:8px 8px 8px 18px;border-radius:999px;align-items:center}
+.input-wrap input{flex:1;border:none;background:transparent;outline:none;font-size:15px}
+.send{width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(135deg,#0082ff,#a033ff);color:#fff;font-size:18px;cursor:pointer}
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px}
+.auth-box{background:#fff;width:100%;max-width:400px;border-radius:20px;padding:24px;text-align:center}
+.auth-box h2{font-size:26px;margin-bottom:4px}
+.auth-box p{color:#65676b;font-size:14px;margin-bottom:16px}
+.auth-box input{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;margin-bottom:10px;outline:none}
+.auth-box input:focus{border-color:#0082ff}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:999px;background:#0082ff;color:#fff;font-weight:700;cursor:pointer;margin-top:4px}
+.auth-link{margin-top:12px;font-size:14px;color:#0082ff;cursor:pointer}
+.hidden{display:none!important}
+@media(max-width:700px){.sidebar{display:none}.cards{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>SIMON AI</h1>
-    <div id="user-area">
-      <div id="auth-form">
-        <input id="auth-name" placeholder="Your Name">
-        <input id="auth-email" placeholder="Email - any email">
-        <input id="auth-pass" type="password" placeholder="Password">
-        <button onclick="sendCode()">Send Verification Code</button>
-        <input id="auth-code" placeholder="Enter 6-digit code from email">
-        <button onclick="doVerify()">Verify & Sign Up</button>
-        <hr><p>Already have account?</p>
-        <button onclick="doLogin()">Login</button>
-      </div>
-      <div id="user-info" style="display:none">
-        <b id="user-name"></b><span id="user-email"></span>
-        <button onclick="logout()">Logout</button>
-      </div>
-    </div>
-  </header>
 
-  <div id="dashboard">
-    <h3>Dashboard</h3>
-    <p id="dash-status">Sign up with email verification to see dashboard.</p>
-    <div id="dash-content" style="display:none">
-      <p>Welcome, <b id="dash-name"></b></p>
-      <p>Chats: <span id="dash-chats">0</span></p>
+<div class="sidebar">
+  <div class="logo">Simon AI<small>BY SIMON TECH EMPIRE</small></div>
+  <button class="side-btn" onclick="newChat()">+ New Chat</button>
+  <div class="side-item active" onclick="showHome()">🏠 Home</div>
+  <div class="side-item" onclick="showChats()">💬 My Chats <span id="chat-count">0</span></div>
+  <div class="side-item" onclick="showAbout()">✨ About Simon</div>
+  <div class="user-card" id="user-card" style="display:none">
+    <div class="avatar" id="avatar-letter">S</div>
+    <div style="flex:1;overflow:hidden"><b id="side-name" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></b><small id="side-email" style="color:#65676b"></small></div>
+    <button onclick="logout()" style="border:none;background:none;cursor:pointer">↪</button>
+  </div>
+  <div id="sidebar-login" style="margin-top:auto"><button class="side-btn" style="width:100%" onclick="openAuth()">Login / Sign Up</button></div>
+</div>
+
+<div class="main">
+  <div class="topbar"><b>Simon AI</b><button class="pill" onclick="openAuth()" id="top-login">Login</button></div>
+  <div class="center" id="center">
+    <div class="hero" id="hero">
+      <div class="hero-avatar">✨</div>
+      <h1>Hello, <span id="hero-name">there</span><br>How can I help?</h1>
+      <p>Your smart AI assistant — chat, learn, create.</p>
+    </div>
+    <div class="cards" id="suggest">
+      <div class="card" onclick="quickAsk('Help me with my homework')"><b>📚 Homework</b><span>Explain any topic simply</span></div>
+      <div class="card" onclick="quickAsk('Write a story for me')"><b>✍️ Write</b><span>Story, essay, caption</span></div>
+      <div class="card" onclick="quickAsk('Help me code a website')"><b>💻 Code</b><span>Build app, fix bug</span></div>
+      <div class="card" onclick="quickAsk('Give me business ideas')"><b>💡 Ideas</b><span>Business, content, money</span></div>
+    </div>
+    <div id="chat-box"></div>
+  </div>
+  <div class="input-area">
+    <div class="input-wrap">
+      <input id="msg" placeholder="Ask Simon AI anything...">
+      <button class="send" onclick="sendChat()">↑</button>
     </div>
   </div>
+</div>
 
-  <div id="chat-box"></div>
-  <div class="input-row">
-    <input id="msg" placeholder="Ask Simon AI...">
-    <button onclick="sendChat()">Send</button>
+<!-- AUTH POPUP -->
+<div class="auth-overlay hidden" id="auth-overlay">
+  <div class="auth-box">
+    <h2 id="auth-title">Create account</h2>
+    <p>Join Simon AI — free, no verification needed</p>
+    <input id="auth-name" placeholder="Your Name">
+    <input id="auth-email" placeholder="Email">
+    <input id="auth-pass" type="password" placeholder="Password">
+    <button class="auth-btn" id="auth-main-btn" onclick="doSignup()">Sign Up</button>
+    <div class="auth-link" id="auth-switch" onclick="toggleAuth()">Already have account? Login</div>
+    <div class="auth-link" onclick="closeAuth()" style="color:#65676b">Close</div>
   </div>
 </div>
 
 <script>
+let isLogin = false;
 async function init(){
   const me = await fetch("/api/account/me").then(r=>r.json());
-  if(me.user){ showUser(me.user); loadDashboard(); }
+  if(me.user) showUser(me.user);
+  loadCount();
 }
-async function sendCode(){
-  const email = document.getElementById("auth-email").value.trim();
-  if(!email || !email.includes("@")) return alert("Enter valid email first");
-  const res = await fetch("/api/auth/send-code",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-  const data = await res.json();
-  alert(data.success ? "Code sent! Check email + Spam" : data.error);
+function openAuth(){ document.getElementById("auth-overlay").classList.remove("hidden"); }
+function closeAuth(){ document.getElementById("auth-overlay").classList.add("hidden"); }
+function toggleAuth(){
+  isLogin = !isLogin;
+  document.getElementById("auth-title").textContent = isLogin ? "Welcome back" : "Create account";
+  document.getElementById("auth-main-btn").textContent = isLogin ? "Login" : "Sign Up";
+  document.getElementById("auth-switch").textContent = isLogin ? "New here? Create account" : "Already have account? Login";
+  document.getElementById("auth-name").style.display = isLogin ? "none" : "block";
+  document.getElementById("auth-main-btn").onclick = isLogin ? doLogin : doSignup;
 }
-async function doVerify(){
+async function doSignup(){
   const name = document.getElementById("auth-name").value.trim();
   const email = document.getElementById("auth-email").value.trim();
   const password = document.getElementById("auth-pass").value;
-  const code = document.getElementById("auth-code").value.trim();
-  if(!name || !email || !password || !code) return alert("Fill name, email, password + code");
-  const res = await fetch("/api/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,password,code})});
+  if(!name||!email||!password) return alert("Fill all fields");
+  const res = await fetch("/api/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,password})});
   const data = await res.json();
-  if(data.success){ showUser(data.user); loadDashboard(); }
+  if(data.success){ showUser(data.user); closeAuth(); }
   else alert(data.error);
 }
 async function doLogin(){
@@ -83,42 +137,53 @@ async function doLogin(){
   const password = document.getElementById("auth-pass").value;
   const res = await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
   const data = await res.json();
-  if(data.success){ showUser(data.user); loadDashboard(); }
+  if(data.success){ showUser(data.user); closeAuth(); }
   else alert(data.error);
 }
 function showUser(user){
-  document.getElementById("auth-form").style.display="none";
-  document.getElementById("user-info").style.display="flex";
-  document.getElementById("user-info").style.gap="8px";
-  document.getElementById("user-name").textContent = user.name;
-  document.getElementById("user-email").textContent = user.email;
-  document.getElementById("dash-name").textContent = user.name;
-  document.getElementById("dash-status").textContent = "Logged in as "+user.email;
-  document.getElementById("dash-content").style.display="block";
+  document.getElementById("hero-name").textContent = user.name.split(" ")[0];
+  document.getElementById("side-name").textContent = user.name;
+  document.getElementById("side-email").textContent = user.email;
+  document.getElementById("avatar-letter").textContent = user.name[0].toUpperCase();
+  document.getElementById("user-card").style.display="flex";
+  document.getElementById("sidebar-login").style.display="none";
+  document.getElementById("top-login").textContent = user.name.split(" ")[0];
 }
-async function loadDashboard(){
-  const chats = await fetch("/api/chats").then(r=>r.json()).catch(()=>({chats:[]}));
-  document.getElementById("dash-chats").textContent = (chats.chats||[]).length;
+async function loadCount(){
+  const c = await fetch("/api/chats").then(r=>r.json()).catch(()=>({chats:[]}));
+  document.getElementById("chat-count").textContent = (c.chats||[]).length;
 }
+function quickAsk(text){ document.getElementById("msg").value = text; sendChat(); }
+function newChat(){ document.getElementById("chat-box").innerHTML=""; document.getElementById("suggest").style.display="grid"; document.getElementById("hero").style.display="block"; }
+function showHome(){ newChat(); }
+async function showChats(){
+  const c = await fetch("/api/chats").then(r=>r.json());
+  const box = document.getElementById("chat-box");
+  document.getElementById("suggest").style.display="none";
+  document.getElementById("hero").style.display="none";
+  box.innerHTML="";
+  if(!c.chats.length) box.innerHTML="<p style='color:#65676b;text-align:center'>No chats yet. Start one!</p>";
+  c.chats.forEach(x=>{ box.innerHTML+=`<div class="msg me">${x.message}</div><div class="msg ai">${x.reply}</div>`; });
+}
+function showAbout(){ alert("Simon AI — Built by Simon Tech Empire. Chat, learn, create."); }
 async function sendChat(){
   const input = document.getElementById("msg");
   const text = input.value.trim();
   if(!text) return;
+  document.getElementById("suggest").style.display="none";
+  document.getElementById("hero").style.display="none";
   const box = document.getElementById("chat-box");
-  box.innerHTML += `<div class="msg"><b>You:</b> ${text}</div>`;
-  input.value = "";
+  box.innerHTML += `<div class="msg me">${text}</div>`;
+  input.value="";
   const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text})});
   const data = await res.json();
-  box.innerHTML += `<div class="msg"><b>Simon:</b> ${data.reply||data.error}</div>`;
+  box.innerHTML += `<div class="msg ai">${data.reply||data.error}</div>`;
   box.scrollTop = box.scrollHeight;
-  loadDashboard();
+  loadCount();
 }
-async function logout(){
-  await fetch("/api/auth/logout",{method:"POST"});
-  location.reload();
-}
+async function logout(){ await fetch("/api/auth/logout",{method:"POST"}); location.reload(); }
 document.getElementById("msg").addEventListener("keydown",e=>{if(e.key==="Enter") sendChat()});
 window.addEventListener("load", init);
 </script>
 </body>
-  </html>
+                                        </html>
